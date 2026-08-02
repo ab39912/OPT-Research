@@ -1,0 +1,5 @@
+# pure_python_stats.py needs NONE of these (standard library only).
+# Required only for the pandas / polars / bonus scripts.
+pandas>=2.0
+polars>=0.20
+matplotlib>=3.7   # only for visualize.py (bonus)

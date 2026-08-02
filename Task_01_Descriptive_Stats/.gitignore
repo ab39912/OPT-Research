@@ -1,0 +1,9 @@
+# Do NOT commit the dataset (per task instructions).
+fb_ads_president_scored_anon.csv
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

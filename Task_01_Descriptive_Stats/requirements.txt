@@ -1,0 +1,4 @@
+# pure_python_stats.py needs NONE of these (standard library only).
+# These are only required for pandas_stats.py and visualize.py.
+pandas>=2.0
+matplotlib>=3.7

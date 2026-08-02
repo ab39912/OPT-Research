@@ -1,0 +1,8 @@
+# Do NOT commit datasets (per task instructions).
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
