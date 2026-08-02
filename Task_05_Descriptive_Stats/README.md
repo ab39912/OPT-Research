@@ -1,56 +1,148 @@
-{
-  "dataset": "2025 Syracuse University Women's Lacrosse",
-  "source": "https://cuse.com/sports/womens-lacrosse/stats/2025/",
-  "notes": "Factual questions have a checkable ground_truth. Judgment questions have no single answer; 'anchors' list the numbers a defensible answer must be consistent with, computed by ground_truth.py.",
-  "questions": [
-    {"id": "A1", "phase": "A", "type": "factual",
-     "prompt": "How many games did Syracuse play in the 2025 season?",
-     "ground_truth": "19", "match": ["19"]},
-    {"id": "A2", "phase": "A", "type": "factual",
-     "prompt": "What was the team's overall win-loss record?",
-     "ground_truth": "10-9", "match": ["10-9"]},
-    {"id": "A3", "phase": "A", "type": "factual",
-     "prompt": "Which player scored the most goals, and how many?",
-     "ground_truth": "Emma Muchnick, 34 goals", "match": ["muchnick", "34"]},
-    {"id": "A4", "phase": "A", "type": "factual",
-     "prompt": "Who led the team in assists?",
-     "ground_truth": "Emma Ward, 46 assists", "match": ["ward", "46"]},
-    {"id": "A5", "phase": "A", "type": "factual",
-     "prompt": "Who led the team in total points?",
-     "ground_truth": "Emma Ward, 76 points", "match": ["ward", "76"]},
-    {"id": "A6", "phase": "A", "type": "factual",
-     "prompt": "What was the team's average margin of victory in its wins?",
-     "ground_truth": "5.5 goals", "match": ["5.5"]},
-    {"id": "A7", "phase": "A", "type": "factual",
-     "prompt": "Which game had the highest combined score (both teams)?",
-     "ground_truth": "UAlbany on 2025-02-07, 30 combined (21-9)",
-     "match": ["ualbany", "30"]},
-    {"id": "A8", "phase": "A", "type": "factual",
-     "prompt": "What was Syracuse's most lopsided loss?",
-     "ground_truth": "Boston College, 2-17", "match": ["boston college", "2-17"]},
-    {"id": "A9", "phase": "A", "type": "factual",
-     "prompt": "How many players scored at least one goal this season?",
-     "ground_truth": "17", "match": ["17"]},
-    {"id": "A10", "phase": "A", "type": "trap",
-     "prompt": "Do the individual players' goal totals add up to the team's total goals? Show the arithmetic.",
-     "ground_truth": "No. Players sum to 234 goals but the team scored 235 (per the team total and the game log). The published per-player table is off by one.",
-     "match": ["234", "235", "no"]},
+# Task_05_Descriptive_Stats
 
-    {"id": "B1", "phase": "B", "type": "judgment",
-     "prompt": "Define 'game changer' as points + 2*(game-winning goals). By that metric, who is the team's top game changer?",
-     "ground_truth": "Emma Ward (index 78)", "anchors": {"ward_index": 78, "trinkaus_index": 51, "muchnick_index": 45}},
-    {"id": "B2", "phase": "B", "type": "judgment",
-     "prompt": "Among players with at least 5 games, who had the highest points per game?",
-     "ground_truth": "Emma Ward (4.0 ppg)", "anchors": {"ward_ppg": 4.0}},
-    {"id": "B3", "phase": "B", "type": "judgment",
-     "prompt": "Define 'two-way impact' as points + ground_balls + caused_turnovers + draw_controls - turnovers. Who ranks highest?",
-     "ground_truth": "Joely Caramelli (85)", "anchors": {"caramelli": 85, "rode": 73, "vandiver": 72}},
-    {"id": "B4", "phase": "B", "type": "judgment",
-     "prompt": "Among players with at least 20 shots, who was the most efficient shooter by shot percentage?",
-     "ground_truth": "Gracie Britton (.488)", "anchors": {"britton": 0.488, "muchnick": 0.479}},
-    {"id": "B5", "phase": "B", "type": "advisory",
-     "prompt": "As a coach, if I wanted to win two more games next season, should I focus on offense or defense? And what one player should I work with to be a game changer, and why?",
-     "ground_truth": "Defensible answer = OFFENSE/finishing. In losses goals-for fell to 8.67/game vs 15.7 in wins (a -7.0 swing), while goals-against rose only to 13.22 from 10.2 (+3.0). Shot% was .491 in wins vs .374 in losses, and there were 3 one-goal losses, so 2 more wins is realistic by improving finishing. Player: Emma Ward (offensive engine: 76 pts, 46 assists, top game-changer index) or Emma Muchnick (top scorer, best efficiency among high-volume shooters at .479) are both defensible.",
-     "anchors": {"gf_swing_wins_minus_losses": 7.03, "ga_swing": 3.02, "shpct_wins": 0.491, "shpct_losses": 0.374, "one_goal_losses": 3}}
-  ]
-}
+**From ground truth to LLM judgment.** This project hands a small, clean dataset
+to a large language model and interrogates it in natural language, using
+self-computed descriptive statistics as the trustworthy answer key. Phase A
+tests factual questions; Phase B defines derived metrics and pushes the model to
+an advisory "coach" judgment — validating every substantive answer against the
+numbers.
+
+## Dataset
+
+**2025 Syracuse University Women's Lacrosse** (10-9), from the official
+cumulative statistics page:
+<https://cuse.com/sports/womens-lacrosse/stats/2025/>
+
+Two small tables:
+- `data/su_wlax_2025_players.csv` — 32 players, season totals (goals, assists,
+  points, shots, ground balls, draw controls, etc.)
+- `data/su_wlax_2025_games.csv` — 19 games, per-game team totals (result, goals
+  for/against, shooting, possession stats)
+
+**The dataset is not committed** (per the task). Regenerate it with:
+
+```bash
+python prepare_data.py     # writes both CSVs into data/
+```
+
+`prepare_data.py` contains the values transcribed from the public page and
+documents the source URL. If you prefer, download/scrape the page yourself and
+place the CSVs in `data/`.
+
+### A real data-quality quirk (kept, not fixed)
+The per-player goal column sums to **234**, but the team scored **235** (both the
+published Total row and the game log agree on 235). The published per-player
+table is internally off by one goal. We treat 235 as team truth and flag the
+discrepancy — it doubles as a deliberate trap (question A10) to see whether a
+model notices or papers over it.
+
+## Reproduce the ground truth
+
+```bash
+python prepare_data.py
+python ground_truth.py     # prints the answer key; writes logs/ground_truth.md
+                           # and logs/questions_with_answers.json
+```
+
+`ground_truth.py` reuses `datakit.py` (the engine from Tasks 2-3) for the
+descriptive-stats layer and `metrics.py` for the Phase-B definitions.
+
+## Run the LLM experiment
+
+The question bank lives in `questions.json` (10 factual/trap + 5 judgment).
+
+```bash
+# Print the dataset + questions to paste into any model (Claude/ChatGPT/Copilot):
+python eval_harness.py --list
+
+# Score a model's answers against ground truth (auto-grades factual/trap):
+python eval_harness.py --score logs/responses_claude-opus-4-8.json
+
+# Optional: auto-query the Anthropic API to generate a run (needs ANTHROPIC_API_KEY):
+python eval_harness.py --ask claude-opus-4-8
+```
+
+Log each model's run in a copy of `PROMPT_LOG_TEMPLATE.md`, and (for auto-grading)
+a `logs/responses_<model>.json` mapping question id → answer.
+
+## Metrics (Phase B)
+
+Full definitions in [`METRICS.md`](METRICS.md). In brief: `game_changer_index`
+= points + 2·GWG; `points_per_game` (min 5 GP); `two_way_impact` =
+pts+GB+CT+DC−TO; `shooting_efficiency` = shot % (min 20 shots). "Most improved"
+is explicitly flagged as **not** computable from season totals (it needs
+per-game player data from the box scores).
+
+## Experiment narrative and findings
+
+Two Claude models were run on the identical question bank; both transcripts are
+in `logs/`. Highlights:
+
+- On a small, clean, fully in-context table the models were reliable across the
+  board, including arithmetic-heavy items and metric applications, without
+  hallucinating a number.
+- They caught **both designed traps**: the goals-reconciliation inconsistency
+  (234 vs 235) and the small-sample shooting rate (excluding a 1-for-1 player).
+- They applied **supplied** metric definitions faithfully rather than drifting to
+  their own notion of "game changer" or "efficient."
+- The advisory answers were genuinely data-grounded: both recommended **offense/
+  finishing** (goals-for swing of −7.0 in losses vs a +3.0 defensive swing; shot
+  % .491 in wins vs .374 in losses; three one-goal losses) and named a
+  defensible game-changer (Emma Ward, the offensive engine).
+
+### Multi-model comparison (bonus)
+
+Two Claude models were run on the identical question bank:
+
+| | Claude Opus 4.8 | Claude Haiku 4.5 |
+|---|---|---|
+| Factual/trap (auto-graded) | 10/10 | 10/10 |
+| Caught the A10 goals trap (234 vs 235) | yes | yes |
+| Respected the B4 shot-volume floor | yes | yes |
+| Judgment answers vs anchors (B1–B5) | all match | all match |
+| Advisory (B5) survives validation | yes | yes |
+
+On this small, clean, fully in-context table the two models were effectively
+**identical** — same factual score, same metric rankings, same validated coach
+recommendation (offense; Emma Ward). The smaller/faster Haiku matched the larger
+Opus across the board and even volunteered full top-5 orderings unprompted. That
+parity is expected: this is the regime LLMs handle best. The discriminating
+tests are a larger/messier context, undefined metrics, or a weaker non-Claude
+model — where confident errors are far more likely. Transcripts:
+`logs/transcript_claude-opus-4-8.md`, `logs/transcript_claude-haiku-4-5.md`.
+
+### Where an LLM should be trusted here — and where not
+This is the regime LLMs handle best: a tiny, clean table fully in context. The
+interesting failure modes are expected to appear (a) with **weaker models**,
+(b) with **larger/messier context**, and (c) on the **judgment** question when
+metrics are left undefined. Those are exactly what the still-to-run
+ChatGPT/Copilot comparison, the context-size stress test, and the
+undefined-metric variant are designed to probe. The reusable takeaway: trust the
+model for lookup and well-specified computation on small clean data, but pin
+down metric definitions yourself and validate every recommendation against
+numbers you computed.
+
+## Repository layout
+
+```
+prepare_data.py        rebuilds the CSVs from the public source (no deps)
+datakit.py             reused stats engine from Tasks 2-3
+metrics.py             explicit Phase-B metric definitions
+ground_truth.py        computes + writes the answer key (no deps)
+questions.json         the question bank with embedded ground truth
+eval_harness.py        list / score / (optional) API-ask; auto-grades factual
+METRICS.md             metric write-up
+PROMPT_LOG_TEMPLATE.md blank log for ChatGPT/Copilot/other runs
+logs/
+  ground_truth.md               generated answer key
+  questions_with_answers.json   generated machine-readable key
+  transcript_claude-opus-4-8.md one real, validated model run (10/10)
+  responses_claude-opus-4-8.json machine-gradeable answers for that run
+  transcript_claude-haiku-4-5.md second model run (10/10)
+  responses_claude-haiku-4-5.json machine-gradeable answers for that run
+```
+
+## Reproducibility
+- No hardcoded paths; scripts take file arguments or sensible defaults.
+- `prepare_data.py`, `ground_truth.py`, and the core harness use only the
+  standard library. The dataset is regenerable and not committed.
