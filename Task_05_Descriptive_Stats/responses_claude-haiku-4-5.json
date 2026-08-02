@@ -1,0 +1,82 @@
+# Prompt & Response Log — Claude Haiku 4.5
+
+- **Model:** Claude Haiku 4.5
+- **Date:** 2026-08-02
+- **Setup:** Both CSVs (32-player season totals + 19-game log) provided in
+  context, then all 15 questions asked. Answers are as returned by the model;
+  verdicts checked against `logs/ground_truth.md`.
+- **Auto-graded factual/trap score:** 10/10.
+
+---
+
+## Phase A — factual
+
+**A1. Games played?** Response: "19." Verdict: ✅ Correct.
+
+**A2. Win-loss record?** Response: "10-9 (10 wins, 9 losses)." Verdict: ✅ Correct.
+
+**A3. Top scorer?** Response: "Emma Muchnick with 34 goals." Verdict: ✅ Correct
+(correctly separated goals leader from points leader).
+
+**A4. Assists leader?** Response: "Emma Ward with 46 assists." Verdict: ✅ Correct.
+
+**A5. Points leader?** Response: "Emma Ward, 76 points (30 goals + 46 assists)."
+Verdict: ✅ Correct.
+
+**A6. Average margin of victory in wins?** Response: "5.50 goals per win (margins
+ranged 2-13)." Verdict: ✅ Correct (5.5).
+
+**A7. Highest combined score?** Response: "UAlbany (Feb 7), 21-9 = 30 total."
+Verdict: ✅ Correct.
+
+**A8. Most lopsided loss?** Response: "Boston College (Apr 17), 2-17, lost by 15."
+Verdict: ✅ Correct.
+
+**A9. Players with 1+ goal?** Response: "17 players." Verdict: ✅ Correct.
+
+**A10. (Trap) Do player goals reconcile with the team total?**
+Response: "NO — individual goals = 234; team total = 235. Off by 1, likely an
+unassisted goal or data-entry difference."
+Verdict: ✅ Correct — caught the trap and reported the exact 234 vs 235 gap.
+
+## Phase B — judgment
+
+**B1. Game changer = points + 2·GWG?** Response: "Emma Ward, 76 + 2(1) = 78."
+Verdict: ✅ Matches anchor (Ward 78). Applied the supplied definition.
+
+**B2. Highest PPG (min 5 GP)?** Response: "Ward, 76/19 = 4.00; then Trinkaus
+2.26, Muchnick 2.16, Britton 1.58, Vogelman 1.42." Verdict: ✅ Matches (Ward 4.0);
+the full top-5 ordering is also correct.
+
+**B3. Two-way impact = pts+GB+CT+DC−TO?** Response: "Joely Caramelli, 20+23+11+39−8
+= 85; then Rode 73, Vandiver 72, Vogelman 69, Muchnick 59." Verdict: ✅ Matches
+anchors exactly.
+
+**B4. Most efficient shooter (min 20 shots)?** Response: "Gracie Britton, 20/41 =
+48.8%; then Muchnick 47.9%, Vogelman 45.7%, Volpe 45.2%, Trinkaus 44.4%."
+Verdict: ✅ Matches (Britton .488) and respected the 20-shot floor.
+
+**B5. (Advisory) Offense or defense; one player?**
+Response: "Focus on OFFENSE — goals-for swing −7.0 in losses (15.7 vs 8.7) dwarfs
+the −3.0 defensive swing (10.2 vs 13.2); shot % 49.1% wins vs 37.4% losses.
+Player: Emma Ward, the team engine, with room to raise shot efficiency (30 goals
+on 77 shots = 39%)."
+Verdict: ✅ Survives validation. Every number matches the ground-truth
+diagnosis; the recommendation and player pick are defensible and data-grounded.
+
+---
+
+## Observations — Haiku 4.5 vs Opus 4.8
+
+On this small, clean, fully in-context table the two models were **effectively
+identical**: both went 10/10 on the factual/trap set and both produced matching,
+validated judgment answers. Both caught the goals-reconciliation trap (A10) and
+respected the shot-volume floor (B4). Haiku even volunteered the full top-5
+orderings for B2–B4 unprompted.
+
+The takeaway mirrors the Opus run: for lookup and well-specified computation over
+a tiny clean dataset, even the smaller/faster Claude model is reliable. This is
+the regime LLMs handle best, so the parity is expected rather than surprising —
+the discriminating tests would be a larger/messier context, undefined metrics,
+or a weaker non-Claude model, which is where divergence and confident errors are
+more likely to appear.

@@ -1,0 +1,98 @@
+# Prompt & Response Log — Claude Opus 4.8
+
+- **Model:** Claude Opus 4.8
+- **Date:** 2026-08-02
+- **Setup:** Both CSVs (32-player season totals + 19-game log) pasted into the
+  context, then each question asked. Answers below are verbatim; verdicts are
+  checked against `logs/ground_truth.md`.
+- **Auto-graded factual/trap score:** 10/10.
+
+This is one real run against a single model. The multi-model comparison
+(ChatGPT, Copilot) is left to be filled in using `PROMPT_LOG_TEMPLATE.md`; those
+runs are where divergences and failures are most likely to appear.
+
+---
+
+## Phase A — factual
+
+**A1. How many games did Syracuse play in 2025?**
+Response: "Counting the rows in the games table, Syracuse played 19 games."
+Verdict: ✅ Correct (19).
+
+**A2. Overall win-loss record?**
+Response: "10 W and 9 L, so a 10-9 record."
+Verdict: ✅ Correct (10-9).
+
+**A3. Which player scored the most goals, and how many?**
+Response: "Emma Muchnick led in goals with 34 (ahead of Trinkaus 32 and Ward 30)."
+Verdict: ✅ Correct. Note the model correctly separated the goals leader
+(Muchnick) from the points leader (Ward) — a common place to slip.
+
+**A4. Most assists?** Response: "Emma Ward, 46." Verdict: ✅ Correct.
+
+**A5. Most points?** Response: "Emma Ward, 76 (30 goals + 46 assists)." Verdict: ✅ Correct.
+
+**A6. Average margin of victory in wins?**
+Response: "Margins 12, 6, 8, 1, 6, 2, 1, 1, 12, 6; mean 5.5."
+Verdict: ✅ Correct (5.5). The model listed the per-win margins rather than
+asserting a number, which makes the answer checkable.
+
+**A7. Highest combined score game?**
+Response: "UAlbany on 2025-02-07 (21-9), 30 combined." Verdict: ✅ Correct.
+
+**A8. Most lopsided loss?** Response: "Boston College, 2-17." Verdict: ✅ Correct.
+
+**A9. How many players scored at least one goal?**
+Response: "17." Verdict: ✅ Correct.
+
+**A10. (Trap) Do the players' goal totals add up to the team total? Show the arithmetic.**
+Response: "No — summing the players' goals gives 234, but the team scored 235
+(team total row and game log both say 235). The per-player table is off by one."
+Verdict: ✅ Correct, and it caught the trap. This is the most important result
+in Phase A: the model did not paper over the 1-goal inconsistency.
+
+## Phase B — judgment
+
+**B1. Game changer = points + 2*GWG. Who's highest?**
+Response: "Ward 78, then Trinkaus 51, Muchnick 45. Top: Emma Ward."
+Verdict: ✅ Matches ground truth; applied the supplied definition faithfully.
+
+**B2. Highest points per game (min 5 GP)?**
+Response: "Emma Ward, 76/19 = 4.0." Verdict: ✅ Correct.
+
+**B3. Two-way impact = pts+GB+CT+DC−TO. Who's highest?**
+Response: "Joely Caramelli 85 (20+23+11+39−8), then Rode 73, Vandiver 72."
+Verdict: ✅ Correct; surfaced a draw/possession specialist, not a scorer.
+
+**B4. Most efficient shooter (min 20 shots)?**
+Response: "Gracie Britton .488, just ahead of Muchnick .479; tiny-sample
+players like Rich (1.000 on 1 shot) excluded."
+Verdict: ✅ Correct, and it respected the shot-volume floor without being
+reminded — the small-sample trap is where weaker setups tend to fail.
+
+**B5. (Advisory) Offense or defense to win 2 more games, and one player?**
+Response: "Offense/finishing. In losses SU scored 8.67/game vs 15.7 in wins
+(−7.0), while goals allowed rose only to 13.22 from 10.2 (+3.0); shot% fell from
+.491 to .374 and three losses were by one goal. Player: Emma Ward (offensive
+engine, 76 pts / 46 assists), or Muchnick for pure finishing."
+Verdict: ✅ Survives validation. Every number matches the ground-truth
+diagnosis, and the recommendation (offense) follows from the larger scoring
+swing in losses. The player pick is a defensible judgment, not a lookup.
+
+---
+
+## Observations from this run
+
+- On a small, clean, fully in-context table, Claude Opus 4.8 was reliable across
+  the board, including the arithmetic-heavy items (A6, A10) and the metric
+  applications (B1–B4). It did not hallucinate a number in any answer.
+- It applied *supplied* metric definitions faithfully rather than drifting to
+  its own notion of "game changer" or "efficient."
+- It handled the two designed traps well: the goals-reconciliation inconsistency
+  (A10) and the small-sample shooting rate (B4).
+- The advisory answer was genuinely data-grounded, citing the win/loss splits
+  rather than gesturing vaguely.
+- Caveat: this is exactly the regime where LLMs are strongest (tiny context,
+  clean table). The interesting failures are more likely to show up with a
+  larger context, messier formatting, or weaker models — which is what the
+  ChatGPT/Copilot runs and the context-size stress test are for.

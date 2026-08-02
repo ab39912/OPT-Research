@@ -1,0 +1,95 @@
+# Prompt & Response Log — <MODEL NAME AND VERSION>
+
+- **Model:** <e.g., ChatGPT (GPT-5), Copilot, Gemini …>
+- **Date:** <YYYY-MM-DD>
+- **Setup:** <how you provided the data — pasted CSV? markdown table? uploaded
+  file? Did the model run code, or answer conversationally?>
+
+> Fill one block per question. Use `python eval_harness.py --list` to get the
+> exact prompts and the dataset to paste in. Check each answer against
+> `logs/ground_truth.md`. Record the answer even when it's wrong — especially
+> when it's wrong. To auto-grade the factual ones, also drop the answers into a
+> `logs/responses_<model>.json` file ({"A1": "...", ...}) and run
+> `python eval_harness.py --score logs/responses_<model>.json`.
+
+---
+
+## Phase A — factual
+
+**A1. How many games did Syracuse play in 2025?**
+Prompt: <exact prompt sent>
+Response: <verbatim>
+Verdict vs ground truth (19): <correct / wrong — and *how* it answered:
+reasoned, restated, or invented?>
+
+**A2. Overall win-loss record?** (GT: 10-9)
+Response:
+Verdict:
+
+**A3. Most goals, and how many?** (GT: Muchnick, 34)
+Response:
+Verdict:
+
+**A4. Most assists?** (GT: Ward, 46)
+Response:
+Verdict:
+
+**A5. Most points?** (GT: Ward, 76)
+Response:
+Verdict:
+
+**A6. Average margin of victory in wins?** (GT: 5.5)
+Response:
+Verdict:
+
+**A7. Highest combined-score game?** (GT: UAlbany 2/7, 30)
+Response:
+Verdict:
+
+**A8. Most lopsided loss?** (GT: Boston College 2-17)
+Response:
+Verdict:
+
+**A9. Players with at least one goal?** (GT: 17)
+Response:
+Verdict:
+
+**A10. (Trap) Do player goals sum to the team total? Show arithmetic.**
+(GT: No — players 234 vs team 235; table off by one)
+Response:
+Verdict: <Did it catch the inconsistency or paper over it?>
+
+## Phase B — judgment
+
+**B1. Game changer = points + 2*GWG. Highest?** (GT: Ward, 78)
+Response:
+Verdict: <Did it apply YOUR definition or drift to its own?>
+
+**B2. Highest points per game (min 5 GP)?** (GT: Ward, 4.0)
+Response:
+Verdict:
+
+**B3. Two-way impact = pts+GB+CT+DC−TO. Highest?** (GT: Caramelli, 85)
+Response:
+Verdict:
+
+**B4. Most efficient shooter (min 20 shots)?** (GT: Britton, .488)
+Response:
+Verdict: <Did it respect the shot floor or get fooled by small samples?>
+
+**B5. (Advisory) Offense or defense for 2 more wins, and one player?**
+(GT anchors: GF swing −7.0 in losses vs GA swing +3.0; sh% .491 wins/.374 losses;
+3 one-goal losses; defensible player = Ward or Muchnick)
+Prompt (include any follow-ups you used):
+Response:
+Verdict: <Did the recommendation survive your own validation? Where did the
+reasoning hold up, where did it break? What prompt engineering moved it?>
+
+---
+
+## Notes for this model
+
+- Where did it start to fail?
+- Was it confidently wrong anywhere?
+- Did letting it run code change accuracy?
+- What prompt changes helped?

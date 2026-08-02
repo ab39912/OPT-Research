@@ -1,0 +1,73 @@
+# Ground-Truth Answer Key — 2025 SU Women's Lacrosse
+
+Computed by `ground_truth.py` from the CSVs built by `prepare_data.py`.
+
+## Phase A — factual
+
+- **games_played**: 19
+- **record**: 10-9
+- **total_goals_for**: 235
+- **total_goals_against**: 221
+- **top_scorer**: Muchnick, Emma (34 goals)
+- **most_assists**: Ward, Emma (46 assists)
+- **most_points**: Ward, Emma (76 points)
+- **avg_margin_in_wins**: 5.5
+- **avg_margin_in_losses**: -4.56
+- **highest_combined_score_game**: UAlbany (2025-02-07), 30 combined (21-9)
+- **biggest_win**: UAlbany 21-9
+- **worst_loss**: Boston College 2-17
+- **players_with_a_goal**: 17
+- **roster_size**: 32
+- **sum_player_goals**: 234
+
+## Phase B — derived metrics
+
+Metric definitions (see `metrics.py`):
+- `points_per_game`: points / games_played (qualified: gp >= 5)
+- `game_changer_index`: points + 2 * game_winning_goals
+- `two_way_impact`: points + ground_balls + caused_turnovers + draw_controls - turnovers
+- `shooting_efficiency`: shot_percentage, among players with >= 20 shots
+- `most_improved`: NOT computable from season totals; would require per-game player data (box scores) to compare first-half vs second-half points-per-game.
+
+**game_changer_index_top5**
+  - Ward, Emma: 78
+  - Trinkaus, Caroline: 51
+  - Muchnick, Emma: 45
+  - Britton, Gracie: 30
+  - Vogelman, Alexa: 27
+
+**points_per_game_top5**
+  - Ward, Emma: 4.0
+  - Trinkaus, Caroline: 2.263
+  - Muchnick, Emma: 2.158
+  - Britton, Gracie: 1.579
+  - Vogelman, Alexa: 1.421
+
+**two_way_impact_top5**
+  - Caramelli, Joely: 85
+  - Rode, Meghan: 73
+  - Vandiver, Coco: 72
+  - Vogelman, Alexa: 69
+  - Muchnick, Emma: 59
+
+**shooting_efficiency_top5**
+  - Britton, Gracie: 0.488
+  - Muchnick, Emma: 0.479
+  - Vogelman, Alexa: 0.457
+  - Volpe, Ashlee: 0.452
+  - Trinkaus, Caroline: 0.444
+
+**offense_defense_diagnosis**
+  - gf_per_game_overall: 12.37
+  - ga_per_game_overall: 11.63
+  - gf_per_game_in_wins: 15.7
+  - gf_per_game_in_losses: 8.67
+  - ga_per_game_in_wins: 10.2
+  - ga_per_game_in_losses: 13.22
+  - one_goal_losses: 3
+  - sh_pct_in_wins: 0.491
+  - sh_pct_in_losses: 0.374
+
+## Data-quality note
+
+Player goals sum to 234, but the team scored 235 (per both the published Total row and the game-by-game log). The per-player table is internally off by one goal — a real quirk in the published data. We treat the game log's 235 as team truth and flag the discrepancy rather than silently reconciling it. This is a useful ground-truth trap to see whether an LLM notices or papers over it.
